@@ -1,0 +1,101 @@
+# Dependencies
+node_modules/
+bower_components/
+vendor/
+
+# Build outputs
+dist/
+build/
+out/
+*.min.js
+*.min.css
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.log
+*.cache
+TEMP/
+temp/
+tmp/
+
+# Archive and backup folders
+Archive/
+archive/
+backup/
+backups/
+old/
+
+# Test files
+test.html
+test.js
+test.css
+debug.html
+debug.js
+# Keep easy-game.html for testing
+!easy-game.html
+
+# Development files
+*.dev.js
+*.dev.css
+*.local.js
+*.local.css
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Environment files
+.env
+.env.local
+.env.*.local
+config.local.js
+
+# Documentation build
+docs/_build/
+docs/generated/
+
+# Unity specific (for MimicBoss Unity project)
+MimicBoss/[Ll]ibrary/
+MimicBoss/[Tt]emp/
+MimicBoss/[Oo]bj/
+MimicBoss/[Bb]uild/
+MimicBoss/[Bb]uilds/
+MimicBoss/[Ll]ogs/
+MimicBoss/[Uu]ser[Ss]ettings/
+*.pidb
+*.suo
+*.user
+*.userprefs
+
+# SuperClaude Framework (keep config but ignore cache)
+SuperClaude_Framework/cache/
+SuperClaude_Framework/temp/
+SuperClaude_Framework/logs/
+
+# Keep these important files
+!.gitignore
+!README.md
+!CLAUDE.md
+!index.html
+!Assets/**
+!audio/**

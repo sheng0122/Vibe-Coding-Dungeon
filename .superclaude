@@ -1,0 +1,16 @@
+# SuperClaude Framework Configuration
+# This file enables SuperClaude features for this project
+
+[agents]
+general-purpose = true
+code-reviewer = true
+output-style-setup = true
+
+[mcp]
+sequential-thinking = true
+consult7 = true
+
+[project]
+type = game-development
+framework = unity
+language = csharp

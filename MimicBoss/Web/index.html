@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寶箱怪 Boss 戰鬥</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        canvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: block;
+        }
+        
+        #ui {
+            color: white;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .health-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            transition: width 0.3s ease;
+            border-radius: 15px;
+        }
+        
+        .boss-health-fill {
+            background: linear-gradient(90deg, #8e44ad, #9b59b6);
+        }
+        
+        .health-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        #controls {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        #phase {
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #gameOver {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        .damage-number {
+            position: absolute;
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 24px;
+            pointer-events: none;
+            animation: floatUp 1s ease-out;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+        
+        #instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="instructions">
+            <h2 style="color: white; text-align: center;">寶箱怪 Boss 戰鬥</h2>
+            <div style="color: white; text-align: center;">
+                使用 WASD 或方向鍵移動 | 空白鍵攻擊 | 靠近寶箱觸發戰鬥
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="ui">
+            <div id="phase">階段 1 - 偽裝中</div>
+            
+            <div style="margin-top: 10px;">
+                <div>Boss 生命值</div>
+                <div class="health-bar">
+                    <div class="health-fill boss-health-fill" id="bossHealth" style="width: 100%"></div>
+                    <div class="health-text" id="bossHealthText">500 / 500</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <div>玩家生命值</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="playerHealth" style="width: 100%"></div>
+                    <div class="health-text" id="playerHealthText">100 / 100</div>
+                </div>
+            </div>
+            
+            <div id="controls">
+                <button onclick="game.restart()">重新開始</button>
+                <button onclick="game.togglePause()">暫停</button>
+                <span style="margin-left: 20px;">金幣: <span id="gold">0</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="gameOver">
+        <h2 id="gameOverTitle">遊戲結束</h2>
+        <p id="gameOverMessage"></p>
+        <button onclick="game.restart()">再試一次</button>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

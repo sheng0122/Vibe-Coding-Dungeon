@@ -1,0 +1,75 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# C# files
+[*.cs]
+indent_size = 4
+indent_style = space
+# C# coding conventions
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
+
+# JavaScript files
+[*.{js,jsx}]
+indent_size = 2
+indent_style = space
+quote_type = single
+
+# HTML files
+[*.{html,htm}]
+indent_size = 2
+indent_style = space
+
+# CSS files
+[*.{css,scss,sass}]
+indent_size = 2
+indent_style = space
+
+# JSON files
+[*.{json,jsonc}]
+indent_size = 2
+indent_style = space
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+indent_style = space
+
+# Markdown files
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# XML files
+[*.{xml,csproj,props,targets}]
+indent_size = 2
+indent_style = space
+
+# Shell scripts
+[*.{sh,bash}]
+end_of_line = lf
+
+# Windows scripts
+[*.{cmd,bat,ps1}]
+end_of_line = crlf
+
+# Unity meta files
+[*.meta]
+indent_size = 2
+end_of_line = lf

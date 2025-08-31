@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>寶箱怪 Boss 戰鬥 (簡單圖片版)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #gameContainer {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        canvas {
+            border: 3px solid #fff;
+            border-radius: 10px;
+            display: block;
+            image-rendering: pixelated;
+        }
+        
+        #ui {
+            color: white;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .health-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            transition: width 0.3s ease;
+            border-radius: 15px;
+        }
+        
+        .boss-health-fill {
+            background: linear-gradient(90deg, #8e44ad, #9b59b6);
+        }
+        
+        .health-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+        
+        #imageUpload {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: white;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        #imagePreview {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .preview-item {
+            text-align: center;
+        }
+        
+        .preview-img {
+            width: 60px;
+            height: 60px;
+            border: 2px solid white;
+            border-radius: 5px;
+            object-fit: contain;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        #status {
+            color: #2ecc71;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h2 style="color: white; text-align: center;">寶箱怪 Boss 戰鬥</h2>
+        <div style="color: white; text-align: center; margin-bottom: 10px;">
+            WASD移動 | 空白鍵攻擊
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="ui">
+            <div>
+                <div>Boss 生命值</div>
+                <div class="health-bar">
+                    <div class="health-fill boss-health-fill" id="bossHealth" style="width: 100%"></div>
+                    <div class="health-text">500 / 500</div>
+                </div>
+            </div>
+            
+            <div>
+                <div>玩家生命值</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="playerHealth" style="width: 100%"></div>
+                    <div class="health-text">100 / 100</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <button onclick="restartGame()">重新開始</button>
+                <span style="margin-left: 20px;">金幣: <span id="gold">0</span></span>
+            </div>
+        </div>
+        
+        <div id="imageUpload">
+            <h3 style="text-align: center;">上傳你的圖片</h3>
+            <div style="text-align: center;">
+                <label class="upload-btn">
+                    選擇玩家圖片
+                    <input type="file" accept="image/*" onchange="loadPlayerImage(event)" style="display: none;">
+                </label>
+                <label class="upload-btn">
+                    選擇怪物圖片
+                    <input type="file" accept="image/*" onchange="loadBossImage(event)" style="display: none;">
+                </label>
+                <button class="upload-btn" onclick="useDefaultImages()">使用預設圖片</button>
+            </div>
+            <div id="imagePreview"></div>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲變數
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        // 圖片變數
+        let playerImage = null;
+        let bossImage = null;
+        let useCustomImages = false;
+        
+        // 玩家物件
+        const player = {
+            x: 100,
+            y: height - 100,
+            width: 40,
+            height: 60,
+            speed: 5,
+            health: 100,
+            maxHealth: 100,
+            gold: 0,
+            color: '#3498db'
+        };
+        
+        // Boss物件
+        const boss = {
+            x: width / 2,
+            y: height / 2,
+            width: 80,
+            height: 60,
+            health: 500,
+            maxHealth: 500,
+            isAwake: false,
+            color: '#8b4513',
+            animFrame: 0
+        };
+        
+        // 控制
+        const keys = {};
+        let projectiles = [];
+        let coins = [];
+        
+        // 載入玩家圖片
+        function loadPlayerImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        playerImage = img;
+                        useCustomImages = true;
+                        showPreview('玩家', e.target.result);
+                        document.getElementById('status').textContent = '✓ 玩家圖片已載入';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 載入Boss圖片
+        function loadBossImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        bossImage = img;
+                        useCustomImages = true;
+                        showPreview('Boss', e.target.result);
+                        document.getElementById('status').textContent = '✓ Boss圖片已載入';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // 顯示預覽
+        function showPreview(name, src) {
+            const preview = document.getElementById('imagePreview');
+            const existing = Array.from(preview.children).find(child => 
+                child.querySelector('div').textContent === name);
+            
+            if (existing) {
+                existing.querySelector('img').src = src;
+            } else {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `
+                    <img src="${src}" class="preview-img">
+                    <div>${name}</div>
+                `;
+                preview.appendChild(item);
+            }
+        }
+        
+        // 使用預設圖片（創建簡單的圖片）
+        function useDefaultImages() {
+            // 創建玩家圖片
+            const playerCanvas = document.createElement('canvas');
+            playerCanvas.width = 40;
+            playerCanvas.height = 60;
+            const pCtx = playerCanvas.getContext('2d');
+            pCtx.fillStyle = '#3498db';
+            pCtx.fillRect(5, 10, 30, 40);
+            pCtx.fillStyle = '#2c3e50';
+            pCtx.fillRect(10, 15, 8, 8);
+            pCtx.fillRect(22, 15, 8, 8);
+            
+            playerImage = new Image();
+            playerImage.src = playerCanvas.toDataURL();
+            
+            // 創建Boss圖片
+            const bossCanvas = document.createElement('canvas');
+            bossCanvas.width = 80;
+            bossCanvas.height = 60;
+            const bCtx = bossCanvas.getContext('2d');
+            bCtx.fillStyle = '#8b4513';
+            bCtx.fillRect(0, 0, 80, 60);
+            bCtx.fillStyle = '#654321';
+            bCtx.strokeRect(5, 5, 70, 50);
+            
+            bossImage = new Image();
+            bossImage.src = bossCanvas.toDataURL();
+            
+            useCustomImages = true;
+            document.getElementById('status').textContent = '✓ 使用預設圖片';
+        }
+        
+        // 鍵盤控制
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                shoot();
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+        
+        // 發射子彈
+        function shoot() {
+            const dx = boss.x - player.x;
+            const dy = boss.y - player.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            projectiles.push({
+                x: player.x,
+                y: player.y,
+                vx: (dx/dist) * 8,
+                vy: (dy/dist) * 8,
+                life: 100
+            });
+        }
+        
+        // 更新遊戲
+        function update() {
+            // 移動玩家
+            if (keys['a']) player.x -= player.speed;
+            if (keys['d']) player.x += player.speed;
+            if (keys['w']) player.y -= player.speed;
+            if (keys['s']) player.y += player.speed;
+            
+            // 邊界檢查
+            player.x = Math.max(20, Math.min(width - 20, player.x));
+            player.y = Math.max(30, Math.min(height - 80, player.y));
+            
+            // 檢查距離喚醒Boss
+            const dx = player.x - boss.x;
+            const dy = player.y - boss.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            
+            if (distance < 150 && !boss.isAwake) {
+                boss.isAwake = true;
+            }
+            
+            // Boss動畫
+            if (boss.isAwake) {
+                boss.animFrame++;
+            }
+            
+            // 更新子彈
+            projectiles = projectiles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                
+                // 檢查擊中Boss
+                if (Math.abs(p.x - boss.x) < 40 && Math.abs(p.y - boss.y) < 30) {
+                    boss.health -= 10;
+                    return false;
+                }
+                
+                return p.life > 0;
+            });
+            
+            // Boss攻擊
+            if (boss.isAwake && boss.animFrame % 60 === 0) {
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI * 2 / 8) * i;
+                    coins.push({
+                        x: boss.x,
+                        y: boss.y,
+                        vx: Math.cos(angle) * 3,
+                        vy: Math.sin(angle) * 3,
+                        life: 150
+                    });
+                }
+            }
+            
+            // 更新金幣
+            coins = coins.filter(c => {
+                c.x += c.vx;
+                c.y += c.vy;
+                c.life--;
+                
+                // 檢查擊中玩家
+                if (Math.abs(c.x - player.x) < 20 && Math.abs(c.y - player.y) < 30) {
+                    player.health -= 5;
+                    return false;
+                }
+                
+                return c.life > 0;
+            });
+            
+            // 更新UI
+            document.getElementById('bossHealth').style.width = (boss.health / boss.maxHealth * 100) + '%';
+            document.getElementById('playerHealth').style.width = (player.health / player.maxHealth * 100) + '%';
+            document.getElementById('gold').textContent = player.gold;
+        }
+        
+        // 繪製遊戲
+        function render() {
+            // 清空畫布
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 地面
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(0, height - 50, width, 50);
+            
+            // 繪製玩家
+            if (playerImage && playerImage.complete) {
+                ctx.drawImage(playerImage, 
+                    player.x - player.width/2, 
+                    player.y - player.height/2, 
+                    player.width, 
+                    player.height);
+            } else {
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+            }
+            
+            // 繪製Boss
+            if (boss.isAwake) {
+                const wobble = Math.sin(boss.animFrame * 0.1) * 5;
+                
+                if (bossImage && bossImage.complete) {
+                    ctx.drawImage(bossImage,
+                        boss.x - boss.width/2 + wobble/2,
+                        boss.y - boss.height/2,
+                        boss.width,
+                        boss.height);
+                } else {
+                    ctx.fillStyle = '#a0522d';
+                    ctx.fillRect(boss.x - boss.width/2 + wobble/2, boss.y - boss.height/2, boss.width, boss.height);
+                }
+            } else {
+                // 寶箱狀態
+                ctx.fillStyle = boss.color;
+                ctx.fillRect(boss.x - boss.width/2, boss.y - boss.height/2, boss.width, boss.height);
+            }
+            
+            // 繪製子彈
+            ctx.fillStyle = '#3498db';
+            projectiles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // 繪製金幣
+            ctx.fillStyle = '#ffd700';
+            coins.forEach(c => {
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        // 遊戲循環
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 重新開始
+        function restartGame() {
+            player.health = player.maxHealth;
+            player.x = 100;
+            player.y = height - 100;
+            boss.health = boss.maxHealth;
+            boss.isAwake = false;
+            boss.animFrame = 0;
+            projectiles = [];
+            coins = [];
+        }
+        
+        // 啟動遊戲
+        gameLoop();
+    </script>
+</body>
+</html>

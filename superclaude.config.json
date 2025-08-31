@@ -1,0 +1,47 @@
+{
+  "project": {
+    "name": "Pixel MimicBoss Game",
+    "type": "game-development",
+    "path": "D:\\Github-repo\\pixel",
+    "description": "Unity-based game with MimicBoss implementation"
+  },
+  "agents": {
+    "enabled": [
+      "general-purpose",
+      "code-reviewer",
+      "output-style-setup"
+    ],
+    "preferences": {
+      "auto_review": true,
+      "code_style": "unity-csharp"
+    }
+  },
+  "commands": {
+    "custom_shortcuts": {
+      "/build": "npm run build",
+      "/test": "npm test",
+      "/run": "npm start"
+    }
+  },
+  "mcp_servers": {
+    "sequential-thinking": {
+      "enabled": true,
+      "priority": "high"
+    },
+    "consult7": {
+      "enabled": true,
+      "model": "gemini-2.5-flash"
+    }
+  },
+  "workflow": {
+    "auto_lint": true,
+    "auto_format": false,
+    "test_on_save": false
+  },
+  "directories": {
+    "source": "Source/Scripts",
+    "assets": "Assets",
+    "docs": "Documents",
+    "web": "Web"
+  }
+}

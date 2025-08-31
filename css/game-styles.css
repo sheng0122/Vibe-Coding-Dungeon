@@ -1,0 +1,502 @@
+/* ========== 基礎設定 ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+body {
+    background: #000;
+    font-family: 'Press Start 2P', cursive;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ========== 手機橫向提示 ========== */
+#rotatePrompt {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#rotatePrompt.show {
+    display: flex;
+}
+
+.rotate-icon {
+    font-size: 60px;
+    animation: rotate 2s ease-in-out infinite;
+    margin-bottom: 30px;
+}
+
+@keyframes rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}
+
+.rotate-text {
+    color: #ffcc66;
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ========== 開始畫面 ========== */
+#startScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('../Assets/Backgrounds/dungeon-start-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 1s;
+}
+
+#startScreen.fadeOut {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#startScreen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+/* ========== 動畫效果 ========== */
+@keyframes fireGlow {
+    0% { filter: brightness(1) drop-shadow(0 0 10px #ff6600); }
+    25% { filter: brightness(1.1) drop-shadow(0 0 15px #ff8833); }
+    50% { filter: brightness(0.95) drop-shadow(0 0 12px #ff6600); }
+    75% { filter: brightness(1.05) drop-shadow(0 0 18px #ff9944); }
+    100% { filter: brightness(1) drop-shadow(0 0 10px #ff6600); }
+}
+
+@keyframes titlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.3; }
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) scale(1);
+        opacity: 1;
+    }
+    25% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) scale(0);
+        opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========== 標題樣式 ========== */
+.title-container {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    animation: fireGlow 3s infinite;
+    margin-bottom: 50px;
+}
+
+.game-title {
+    font-size: clamp(24px, 6vw, 48px);
+    color: #ff9944;
+    text-shadow: 
+        3px 3px 0px #8b4513,
+        6px 6px 0px #5d2f0d,
+        9px 9px 20px rgba(255, 102, 0, 0.8),
+        0 0 40px rgba(255, 102, 0, 0.5);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    animation: titlePulse 2s ease-in-out infinite;
+}
+
+/* ========== 按鈕樣式 ========== */
+.button-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.dungeon-btn {
+    background: linear-gradient(180deg, #4a3c28 0%, #2e2416 100%);
+    border: 3px solid #8b6914;
+    padding: 15px 40px;
+    font-size: clamp(14px, 2.5vw, 18px);
+    color: #ffcc66;
+    text-shadow: 2px 2px 0px #000;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+    box-shadow: 
+        inset 0 -4px 0 #1a1410,
+        0 4px 8px rgba(0, 0, 0, 0.8);
+    font-family: 'Press Start 2P', cursive;
+    letter-spacing: 1px;
+}
+
+.dungeon-btn::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, #ff6600, #ff9944, #ff6600);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s;
+    filter: blur(4px);
+}
+
+.dungeon-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 -4px 0 #1a1410,
+        0 6px 12px rgba(0, 0, 0, 0.9);
+    color: #ffdd88;
+}
+
+.dungeon-btn:hover::before {
+    opacity: 0.6;
+}
+
+.dungeon-btn:active {
+    transform: translateY(2px);
+    box-shadow: 
+        inset 0 -2px 0 #1a1410,
+        0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.restart-btn {
+    background: linear-gradient(180deg, #4a3c28 0%, #2e2416 100%);
+    border: 3px solid #8b6914;
+    padding: 15px 40px;
+    font-size: clamp(14px, 2.5vw, 18px);
+    color: #ffcc66;
+    text-shadow: 2px 2px 0px #000;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    transition: all 0.3s;
+}
+
+.restart-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(255, 102, 0, 0.8);
+}
+
+/* ========== 火焰粒子效果 ========== */
+.fire-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff6600;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: floatUp 3s linear infinite;
+}
+
+/* ========== 遊戲容器 ========== */
+#gameContainer {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background: #1a1a2e;
+}
+
+#gameContainer.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameCanvas {
+    border: 3px solid #8b6914;
+    box-shadow: 0 0 30px rgba(255, 102, 0, 0.5);
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* ========== 引導視窗 ========== */
+#guideWindow {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(180deg, #2e2416 0%, #1a1410 100%);
+    border: 3px solid #8b6914;
+    padding: 30px;
+    z-index: 2000;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+    max-width: 500px;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#guideWindow.show {
+    display: block;
+    animation: slideIn 0.5s ease-out;
+}
+
+.guide-title {
+    color: #ff9944;
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 0px #000;
+    text-align: center;
+}
+
+.guide-content {
+    color: #cccccc;
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.guide-controls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.control-key {
+    color: #ffcc66;
+    background: #1a1410;
+    padding: 5px 10px;
+    border: 1px solid #8b6914;
+}
+
+.control-desc {
+    color: #999;
+    padding: 5px;
+}
+
+.guide-close {
+    width: 100%;
+    background: linear-gradient(180deg, #4a3c28 0%, #2e2416 100%);
+    border: 2px solid #8b6914;
+    padding: 10px;
+    color: #ffcc66;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    transition: all 0.3s;
+}
+
+.guide-close:hover {
+    background: linear-gradient(180deg, #5a4c38 0%, #3e3426 100%);
+    transform: scale(1.05);
+}
+
+/* ========== 遊戲結束畫面 ========== */
+#gameOverScreen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 3000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#gameOverScreen.show {
+    display: flex;
+    animation: fadeIn 0.5s;
+}
+
+.game-over-title {
+    font-size: clamp(30px, 8vw, 60px);
+    margin-bottom: 30px;
+    text-shadow: 
+        3px 3px 0px #8b4513,
+        6px 6px 0px #5d2f0d,
+        0 0 30px rgba(255, 102, 0, 0.8);
+    animation: titlePulse 2s ease-in-out infinite;
+}
+
+.victory { color: #ffcc00; }
+.defeat { color: #ff3333; }
+
+.game-over-score {
+    font-size: clamp(16px, 3vw, 24px);
+    color: #cccccc;
+    margin-bottom: 40px;
+}
+
+/* ========== UI面板 ========== */
+#gameUI {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    z-index: 100;
+}
+
+.ui-panel {
+    background: rgba(42, 36, 22, 0.9);
+    border: 2px solid #8b6914;
+    padding: 10px 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.health-bar {
+    width: 150px;
+    height: 20px;
+    background: #1a1410;
+    border: 2px solid #8b6914;
+    margin: 5px 0;
+    position: relative;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff3333, #ff6666);
+    transition: width 0.3s;
+}
+
+.boss-health-fill {
+    background: linear-gradient(90deg, #9933ff, #cc66ff);
+}
+
+/* ========== 手機控制 ========== */
+#mobileControls {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 0 20px;
+}
+
+.mobile-controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.control-btn {
+    width: 70px;
+    height: 70px;
+    background: rgba(139, 105, 20, 0.9);
+    border: 3px solid #ffcc66;
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: all 0.1s;
+}
+
+.control-btn:active {
+    background: rgba(255, 204, 102, 0.9);
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* ========== 響應式設計 ========== */
+@media (max-width: 768px) and (orientation: landscape) {
+    #mobileControls {
+        display: block !important;
+    }
+    
+    #gameCanvas {
+        border: none;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+    }
+    
+    #gameUI {
+        font-size: 10px;
+    }
+    
+    .ui-panel {
+        padding: 5px 8px;
+    }
+    
+    .health-bar {
+        width: 100px;
+        height: 15px;
+    }
+    
+    .control-btn {
+        opacity: 0.8;
+    }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+    #gameContainer {
+        display: none !important;
+    }
+}
