@@ -1350,9 +1350,9 @@ const giftSounds = {};
 function preloadGiftSounds() {
     const soundFiles = {
         'invincible': 'Assets/Audio/GiftBox/gift_invincible.mp3',
-        'speed': 'Assets/Audio/GiftBox/gift_speed.mp3',
-        'vampire': 'Assets/Audio/GiftBox/gift_vampire.mp3',
-        'cursed': 'Assets/Audio/GiftBox/gift_cursed.mp3'
+        'speed': 'Assets/Audio/GiftBox/gift_speed.MP3',
+        'vampire': 'Assets/Audio/GiftBox/gift_vampire.MP3',
+        'cursed': 'Assets/Audio/GiftBox/gift_cursed.MP3'
     };
     
     for (const [key, path] of Object.entries(soundFiles)) {
@@ -5020,7 +5020,9 @@ class GiftBox {
             }).catch(error => {
                 console.error('Failed to play gift sound:', effectType, error);
                 // 如果預載入的音效失敗，嘗試創建新的
-                const fallbackAudio = new Audio(`Assets/Audio/GiftBox/gift_${effectType}.mp3`);
+                // 根據不同類型使用正確的副檔名
+                const extension = (effectType === 'invincible') ? 'mp3' : 'MP3';
+                const fallbackAudio = new Audio(`Assets/Audio/GiftBox/gift_${effectType}.${extension}`);
                 fallbackAudio.volume = 1.0;  // 最大音量
                 fallbackAudio.play().catch(e => console.error('Fallback audio also failed:', e));
             });
