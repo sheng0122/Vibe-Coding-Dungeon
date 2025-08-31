@@ -1944,6 +1944,8 @@ class GameEngine {
     }
     
     createInvincibleEffect(playerX, playerY) {
+        console.log('Creating invincible effect at:', playerX, playerY);
+        
         // 移除舊的特效
         if (this.activeBuffEffects.invincible) {
             if (this.activeBuffEffects.invincible.element) {
@@ -2121,50 +2123,62 @@ class GameEngine {
         
         scene.add(group);
         
+        // 儲存所有需要動畫的元素
+        const animationData = {
+            core,
+            hexShields,
+            flowRings,
+            particleSystem,
+            particleCount,
+            field,
+            light
+        };
+        
         // 開始動畫循環
         const animate = () => {
-            if (!this.activeBuffEffects.invincible) return;
-            
-            requestAnimationFrame(animate);
+            try {
+                if (!this.activeBuffEffects.invincible) return;
+                
+                requestAnimationFrame(animate);
             
             // 動畫效果
             const time = Date.now() * 0.001;
             
             // 核心跳動效果
             const heartbeat = 1 + Math.sin(time * 4) * 0.1;
-            core.scale.set(heartbeat, heartbeat, heartbeat);
-            core.rotation.x += 0.01;
-            core.rotation.y += 0.02;
+            animationData.core.scale.set(heartbeat, heartbeat, heartbeat);
+            animationData.core.rotation.x += 0.01;
+            animationData.core.rotation.y += 0.02;
             
             // 六角形護盾旋轉
-            hexShields.forEach((shield, i) => {
+            animationData.hexShields.forEach((shield, i) => {
                 shield.rotation.z += 0.01 * (i + 1);
                 const pulse = 1 + Math.sin(time * 2 + i * 0.5) * 0.05;
                 shield.scale.set(pulse, pulse, 1);
             });
             
             // 能量環流動
-            flowRings.forEach((ring, i) => {
+            animationData.flowRings.forEach((ring, i) => {
                 ring.rotation.z += 0.02 * (i % 2 === 0 ? 1 : -1);
                 ring.rotation.x += 0.005;
             });
             
             // 粒子螺旋上升
-            particleSystem.rotation.y += 0.01;
-            const particlePositions = particleSystem.geometry.attributes.position.array;
-            for (let i = 0; i < particleCount; i++) {
+            animationData.particleSystem.rotation.y += 0.01;
+            const particlePositions = animationData.particleSystem.geometry.attributes.position.array;
+            for (let i = 0; i < animationData.particleCount; i++) {
                 particlePositions[i * 3 + 1] += 0.5;
                 if (particlePositions[i * 3 + 1] > 30) {
                     particlePositions[i * 3 + 1] = -30;
                 }
             }
-            particleSystem.geometry.attributes.position.needsUpdate = true;
+            animationData.particleSystem.geometry.attributes.position.needsUpdate = true;
             
             // 更新能量場 shader
-            field.material.uniforms.time.value = time;
+            animationData.field.material.uniforms.time.value = time;
             
             // 光源脈動
-            light.intensity = 2 + Math.sin(time * 3) * 0.5;
+            animationData.light.intensity = 2 + Math.sin(time * 3) * 0.5;
             
             // 更新位置跟隨玩家
             const canvas = document.getElementById('gameCanvas');
@@ -2178,6 +2192,9 @@ class GameEngine {
             }
             
             renderer.render(scene, camera);
+            } catch (error) {
+                console.error('Error in invincible effect animation:', error);
+            }
         };
         
         animate();
@@ -2383,6 +2400,16 @@ class GameEngine {
         
         scene.add(group);
         
+        // 儲存所有需要動畫的元素
+        const animationData = {
+            speedLineData,
+            orbitRings,
+            trailParticles,
+            innerCore,
+            outerCore,
+            speedLight
+        };
+        
         // 開始動畫循環
         const animate = () => {
             if (!this.activeBuffEffects.speed) return;
@@ -2393,7 +2420,7 @@ class GameEngine {
             const time = Date.now() * 0.001;
             
             // 速度線動態流動
-            speedLineData.forEach((data, i) => {
+            animationData.speedLineData.forEach((data, i) => {
                 const line = data.line;
                 const positions = line.geometry.attributes.position.array;
                 const newAngle = data.offset + time * data.speed;
@@ -2412,7 +2439,7 @@ class GameEngine {
             });
             
             // 軌道環高速旋轉
-            orbitRings.forEach((ring, i) => {
+            animationData.orbitRings.forEach((ring, i) => {
                 ring.rotation.z += 0.1 * (i + 1);
                 ring.rotation.y += 0.05 * (2 - i);
                 const pulse = 1 + Math.sin(time * 5 + i) * 0.1;
@@ -2420,26 +2447,26 @@ class GameEngine {
             });
             
             // 殘影粒子流動
-            trailParticles.forEach((particles, t) => {
+            animationData.trailParticles.forEach((particles, t) => {
                 particles.rotation.y += 0.02 * (t + 1);
                 particles.position.z = -t * 3 + Math.sin(time * 3) * 2;
                 particles.material.opacity = 0.6 - t * 0.1 - Math.sin(time * 2) * 0.1;
             });
             
             // 核心高速旋轉
-            innerCore.rotation.x += 0.1;
-            innerCore.rotation.y += 0.15;
-            innerCore.rotation.z += 0.05;
+            animationData.innerCore.rotation.x += 0.1;
+            animationData.innerCore.rotation.y += 0.15;
+            animationData.innerCore.rotation.z += 0.05;
             
-            outerCore.rotation.x -= 0.08;
-            outerCore.rotation.y += 0.12;
+            animationData.outerCore.rotation.x -= 0.08;
+            animationData.outerCore.rotation.y += 0.12;
             
             // 核心脈動
             const corePulse = 1 + Math.sin(time * 8) * 0.2;
-            innerCore.scale.set(corePulse, corePulse, corePulse);
+            animationData.innerCore.scale.set(corePulse, corePulse, corePulse);
             
             // 光源閃爍
-            speedLight.intensity = 2 + Math.sin(time * 10) * 1;
+            animationData.speedLight.intensity = 2 + Math.sin(time * 10) * 1;
             
             // 更新位置跟隨玩家
             const canvas = document.getElementById('gameCanvas');
@@ -2544,6 +2571,16 @@ class GameEngine {
         
         scene.add(group);
         
+        // 儲存所有需要動畫的元素
+        const animationData = {
+            vortexRings,
+            bloodParticles,
+            fangsGroup,
+            bloodCore,
+            bloodAura,
+            vampireLight
+        };
+        
         // 開始動畫循環
         const animate = () => {
             if (!this.activeBuffEffects.vampire) return;
@@ -2554,7 +2591,7 @@ class GameEngine {
             const time = Date.now() * 0.001;
             
             // 漩渦旋轉
-            vortexRings.forEach((ring, i) => {
+            animationData.vortexRings.forEach((ring, i) => {
                 ring.rotation.z += 0.03 * (i + 1);
                 const scale = 1 + Math.sin(time * 2 + i * 0.5) * 0.15;
                 ring.scale.set(scale, scale, 1);
@@ -2562,7 +2599,7 @@ class GameEngine {
             });
             
             // 血液粒子螺旋吸收
-            bloodParticles.forEach((data) => {
+            animationData.bloodParticles.forEach((data) => {
                 const positions = data.system.geometry.attributes.position.array;
                 const particleCount = positions.length / 3;
                 
@@ -2582,22 +2619,22 @@ class GameEngine {
             });
             
             // 吸血牙齒動畫
-            fangsGroup.children.forEach((fang, i) => {
+            animationData.fangsGroup.children.forEach((fang, i) => {
                 fang.position.y = 15 + Math.sin(time * 4 + i * Math.PI) * 3;
                 fang.scale.y = 1 + Math.sin(time * 6) * 0.2;
             });
             
             // 血核脈動
             const corePulse = 1 + Math.sin(time * 5) * 0.3;
-            bloodCore.scale.set(corePulse, corePulse, corePulse);
-            bloodCore.rotation.x += 0.02;
-            bloodCore.rotation.y += 0.03;
+            animationData.bloodCore.scale.set(corePulse, corePulse, corePulse);
+            animationData.bloodCore.rotation.x += 0.02;
+            animationData.bloodCore.rotation.y += 0.03;
             
             // 更新血色光暈 shader
-            bloodAura.material.uniforms.time.value = time;
+            animationData.bloodAura.material.uniforms.time.value = time;
             
             // 光源脈動
-            vampireLight.intensity = 2 + Math.sin(time * 4) * 0.8;
+            animationData.vampireLight.intensity = 2 + Math.sin(time * 4) * 0.8;
             
             // 更新位置跟隨玩家
             const canvas = document.getElementById('gameCanvas');
@@ -2632,6 +2669,7 @@ class GameEngine {
         // 更新或創建對應的特效
         if (player.buffType === 'invincible' && player.invincible) {
             if (!this.activeBuffEffects.invincible) {
+                console.log('Player has invincible buff, creating effect...');
                 this.createInvincibleEffect(x, y);
             }
         } else if (this.activeBuffEffects.invincible) {
